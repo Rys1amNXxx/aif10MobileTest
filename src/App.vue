@@ -73,6 +73,8 @@ export default {
         { ...baseData },
         { ...baseData, announcementDate: '2024-10-29', latestAnnouncementDate: '2024-10-29' },
         { ...baseData, announcementDate: '2024-05-14', latestAnnouncementDate: '2024-05-14' },
+        { ...baseData, announcementDate: '2024-01-01', latestAnnouncementDate: '2024-01-01' }, 
+        { ...baseData, announcementDate: '2023-07-15', latestAnnouncementDate: '2023-07-15' },
       ]
     },
     onTabChange(index) {

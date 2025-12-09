@@ -7,7 +7,8 @@
     </div>
 
     <!-- 日期切换 - 使用 atom-tabs -->
-    <atom-tabs v-model="activeIndex" :isFull="true" type="card" class="date-tabs" @change="handleTabChange">
+    <atom-tabs isSmallText blockScrollable swipeThreshold=3 v-model="activeIndex" type="block" class="date-tabs"
+      @change="handleTabChange">
       <atom-tab v-for="(item, index) in repurchaseList" :key="index" :title="item.announcementDate" :name="index" />
     </atom-tabs>
 
@@ -230,7 +231,6 @@ export default {
           isFailed: true,
         })
       }
-
       return steps
     },
   },
@@ -289,7 +289,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .title {
@@ -306,7 +306,7 @@ export default {
 
 /* 日期切换标签 - atom-tabs 样式覆盖 */
 .date-tabs {
-  margin-bottom: 16px;
+  font-size: 14px;
 }
 
 .date-tabs ::v-deep .atom-tabs__nav {
@@ -315,18 +315,19 @@ export default {
 
 .date-tabs ::v-deep .atom-tab {
   padding: 4px 12px;
-  font-size: 12px;
   color: #00000099;
   background: #FFFFFF;
   border-radius: 4px;
   margin-right: 8px;
   border: 1px solid #00000014;
+  font-family: THS JinRongTi;
 }
 
 .date-tabs ::v-deep .atom-tab--active {
   color: #000000D6;
   background: #0000000A;
   font-weight: 700;
+  border: none;
 }
 
 /* 渐变背景区域 */
@@ -511,7 +512,6 @@ export default {
   display: flex;
   justify-content: space-between;
   text-align: center;
-  /* margin-bottom: 1px; */
   background-color: #F9F9F9;
   padding: 10px;
 }
