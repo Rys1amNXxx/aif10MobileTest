@@ -6,68 +6,50 @@
       <span class="more" @click="handleMoreClick">更多 &gt;</span>
     </div>
 
-    <!-- 日期切换 -->
-    <div class="date-tabs">
-      <div
-        v-for="(item, index) in repurchaseList"
-        :key="index"
-        :class="['date-tab', { active: activeIndex === index }]"
-        @click="handleTabChange(index)"
-      >
-        {{ item.announcementDate }}
+    <!-- 日期切换 - 使用 atom-tabs -->
+    <atom-tabs v-model="activeIndex" :isFull="true" type="card" class="date-tabs" @change="handleTabChange">
+      <atom-tab v-for="(item, index) in repurchaseList" :key="index" :title="item.announcementDate" :name="index" />
+    </atom-tabs>
+
+    <!-- 渐变背景区域 -->
+    <div class="gradient-section">
+      <!-- 公告信息 -->
+      <div class="announcement-info">
+        <span class="label">最新公告日：</span>
+        <span class="date">{{ currentData.latestAnnouncementDate }}</span>
+        <div class="tags">
+          <atom-tag v-for="tag in currentData.tags" :key="tag" color="#00000014" textColor="#00000099"
+            :type="getTagType(tag)">
+            {{ tag }}
+          </atom-tag>
+        </div>
       </div>
-    </div>
 
-    <!-- 公告信息 -->
-    <div class="announcement-info">
-      <span class="label">最新公告日：</span>
-      <span class="date">{{ currentData.latestAnnouncementDate }}</span>
-      <div class="tags">
-        <el-tag
-          v-for="tag in currentData.tags"
-          :key="tag"
-          size="mini"
-          :type="getTagType(tag)"
-          effect="plain"
-        >
-          {{ tag }}
-        </el-tag>
-      </div>
-    </div>
+      <!-- 进度时间轴 -->
+      <div class="progress-timeline">
+        <div class="timeline-container">
+          <!-- 时间线节点 -->
+          <div v-for="(step, index) in timelineSteps" :key="step.key" class="timeline-step"
+            :class="{ 'is-active': step.isActive, 'is-completed': step.isCompleted, 'is-failed': step.isFailed }">
+            <!-- 日期标签（上方） -->
+            <div class="step-date" :class="{ 'text-failed': step.isFailed }">{{ step.date || '' }}</div>
 
-    <!-- 进度时间轴 -->
-    <div class="progress-timeline">
-      <div class="timeline-container">
-        <!-- 时间线节点 -->
-        <div
-          v-for="(step, index) in timelineSteps"
-          :key="step.key"
-          class="timeline-step"
-          :class="{ 'is-active': step.isActive, 'is-completed': step.isCompleted, 'is-failed': step.isFailed }"
-        >
-          <!-- 节点圆点 -->
-          <div class="step-dot" :class="getDotClass(step)">
-            <span v-if="step.isCompleted && !step.isFailed" class="dot-inner"></span>
-          </div>
+            <!-- 节点圆点和连接线容器 -->
+            <div class="step-dot-container">
+              <div class="step-dot" :class="getDotClass(step)">
+                <span v-if="step.isCompleted && !step.isFailed" class="dot-inner"></span>
+              </div>
+              <!-- 连接线 -->
+              <div v-if="index < timelineSteps.length - 1" class="step-line" :class="getLineClass(step, index)"></div>
+            </div>
 
-          <!-- 连接线 -->
-          <div
-            v-if="index < timelineSteps.length - 1"
-            class="step-line"
-            :class="getLineClass(step, index)"
-          ></div>
-
-          <!-- 节点标签 -->
-          <div class="step-label">
-            <div class="step-date">{{ step.date || '' }}</div>
+            <!-- 节点名称（下方） -->
             <div class="step-name" :class="{ 'text-failed': step.isFailed }">{{ step.label }}</div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 预案/进展信息 -->
-    <div class="summary-info">
+      <!-- 预案/进展信息 -->
       <div class="summary-item">
         <span class="summary-label">预案</span>
         <span class="summary-text">{{ currentData.planSummary }}</span>
@@ -76,41 +58,42 @@
         <span class="summary-label">进展</span>
         <span class="summary-text">{{ currentData.progressSummary }}</span>
       </div>
-    </div>
 
-    <!-- 价格统计 -->
-    <div class="price-stats">
-      <div class="stat-item">
-        <div class="stat-value">{{ currentData.avgPrice }}元</div>
-        <div class="stat-label">回购均价</div>
-        <div class="stat-extra" :class="{ negative: currentData.priceChangePercent < 0 }">
-          {{ formatPercent(currentData.priceChangePercent) }}
+      <!-- 价格统计 -->
+      <div class="price-stats">
+        <div class="stat-item">
+          <div class="stat-value">{{ currentData.avgPrice }}元</div>
+          <div class="stat-label">回购均价</div>
+          <div class="stat-extra" :class="{ negative: currentData.priceChangePercent < 0 }">
+            {{ formatPercent(currentData.priceChangePercent) }}
+          </div>
+          <div class="stat-sub-label">较最新收盘价</div>
         </div>
-        <div class="stat-sub-label">较最新收盘价</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">{{ currentData.maxPrice }}元</div>
-        <div class="stat-label">最高成交价</div>
-        <div class="stat-extra date">{{ currentData.startDate }}</div>
-        <div class="stat-sub-label">回购起始日期</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">{{ currentData.minPrice }}元</div>
-        <div class="stat-label">最低成交价</div>
-        <div class="stat-extra date">{{ currentData.endDate }}</div>
-        <div class="stat-sub-label">回购截止日期</div>
+        <div class="stat-item">
+          <div class="stat-value">{{ currentData.maxPrice }}元</div>
+          <div class="stat-label">最高成交价</div>
+          <div class="stat-extra date">{{ currentData.startDate }}</div>
+          <div class="stat-sub-label">回购起始日期</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ currentData.minPrice }}元</div>
+          <div class="stat-label">最低成交价</div>
+          <div class="stat-extra date">{{ currentData.endDate }}</div>
+          <div class="stat-sub-label">回购截止日期</div>
+        </div>
       </div>
     </div>
 
-    <!-- 底部链接 -->
-    <div class="footer-link" @click="handleFooterClick">
-      <span>近一年累计回购案数达{{ totalCount }}家</span>
-      <span class="arrow">&gt;</span>
-    </div>
+    <!-- 底部链接 - 使用 atom-notice-bar -->
+    <atom-notice-bar icon="horn-open" text="近一年累计回购案数达999家" linkable class="footer-notice" :isFull="false"
+      @click="handleFooterClick" />
   </div>
 </template>
 
 <script>
+import { Tag as AtomTag, Tabs as AtomTabs, Tab as AtomTab, NoticeBar as AtomNoticeBar } from '@atom/atom-ui'
+import '@atom/atom-icons/icons/horn-open';
+
 // 状态枚举
 const STATUS = {
   PLAN_PUBLISHED: 'plan_published',       // 预案发布
@@ -125,16 +108,17 @@ const STATUS = {
 
 export default {
   name: 'StockRepurchase',
+  components: {
+    AtomTag,
+    AtomTabs,
+    AtomTab,
+    AtomNoticeBar,
+  },
   props: {
     // 回购列表数据
     repurchaseList: {
       type: Array,
       default: () => [],
-    },
-    // 累计回购家数
-    totalCount: {
-      type: Number,
-      default: 999,
     },
   },
   data() {
@@ -263,11 +247,11 @@ export default {
     },
     getTagType(tag) {
       const tagTypes = {
-        '集中竞价': '',
+        '集中竞价': 'primary',
         '大宗交易': 'success',
-        '其他': 'info',
+        '其他': 'default',
       }
-      return tagTypes[tag] || 'info'
+      return tagTypes[tag] || 'default'
     },
     getDotClass(step) {
       if (step.isFailed) return 'dot-failed'
@@ -320,28 +304,37 @@ export default {
   cursor: pointer;
 }
 
-/* 日期切换标签 */
+/* 日期切换标签 - atom-tabs 样式覆盖 */
 .date-tabs {
-  display: flex;
-  gap: 8px;
   margin-bottom: 16px;
-  overflow-x: auto;
 }
 
-.date-tab {
-  padding: 6px 12px;
+.date-tabs ::v-deep .atom-tabs__nav {
+  background: transparent;
+}
+
+.date-tabs ::v-deep .atom-tab {
+  padding: 4px 12px;
   font-size: 12px;
-  color: #666;
-  background: #f5f5f5;
+  color: #00000099;
+  background: #FFFFFF;
   border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
+  margin-right: 8px;
+  border: 1px solid #00000014;
 }
 
-.date-tab.active {
-  color: #8b5cf6;
-  background: #f3e8ff;
+.date-tabs ::v-deep .atom-tab--active {
+  color: #000000D6;
+  background: #0000000A;
+  font-weight: 700;
+}
+
+/* 渐变背景区域 */
+.gradient-section {
+  background: linear-gradient(179.87deg, rgba(255, 36, 54, 0.06) 0.11%, rgba(255, 36, 54, 0) 64.34%);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #FF24360A;
 }
 
 /* 公告信息 */
@@ -355,7 +348,10 @@ export default {
 }
 
 .announcement-info .label {
+  font-size: 12px;
   color: #666;
+  font-weight: 600;
+  color: #000000D6;
 }
 
 .announcement-info .date {
@@ -369,8 +365,10 @@ export default {
 
 /* 进度时间轴 */
 .progress-timeline {
-  margin: 20px 0;
+  margin: 10px 0;
   padding: 0 8px;
+  border-bottom: 1px dashed #00000033;
+  padding-bottom: 12px;
 }
 
 .timeline-container {
@@ -385,6 +383,24 @@ export default {
   align-items: center;
   flex: 1;
   position: relative;
+}
+
+/* 日期标签（上方） */
+.step-date {
+  font-size: 11px;
+  color: #FF2436;
+  margin-bottom: 4px;
+  min-height: 14px;
+  text-align: center;
+}
+
+/* 圆点和连接线容器 */
+.step-dot-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .step-dot {
@@ -407,12 +423,12 @@ export default {
 }
 
 .dot-completed {
-  border-color: #10b981;
-  color: #10b981;
+  border-color: #FF2436;
+  color: #FFFFFF;
 }
 
 .dot-active {
-  border-color: #10b981;
+  border-color: #FF2436;
 }
 
 .dot-pending {
@@ -426,17 +442,18 @@ export default {
 
 .step-line {
   position: absolute;
-  top: 5px;
+  top: 50%;
   left: 50%;
   width: 100%;
   height: 2px;
   background: #ddd;
   z-index: 1;
+  transform: translateY(-50%);
 }
 
 .line-completed,
 .line-active {
-  background: #10b981;
+  background: #FF2436;
 }
 
 .line-failed {
@@ -447,21 +464,12 @@ export default {
   background: #ddd;
 }
 
-.step-label {
-  margin-top: 8px;
-  text-align: center;
-}
-
-.step-date {
-  font-size: 11px;
-  color: #8b5cf6;
-  margin-bottom: 2px;
-  min-height: 14px;
-}
-
+/* 节点名称（下方） */
 .step-name {
   font-size: 12px;
   color: #666;
+  margin-top: 4px;
+  text-align: center;
 }
 
 .text-failed {
@@ -488,13 +496,14 @@ export default {
 }
 
 .summary-label {
-  color: #999;
+  color: #000000D6;
   flex-shrink: 0;
   margin-right: 8px;
+  font-weight: 600;
 }
 
 .summary-text {
-  color: #333;
+  color: #00000099;
 }
 
 /* 价格统计 */
@@ -502,7 +511,9 @@ export default {
   display: flex;
   justify-content: space-between;
   text-align: center;
-  margin-bottom: 16px;
+  /* margin-bottom: 1px; */
+  background-color: #F9F9F9;
+  padding: 10px;
 }
 
 .stat-item {
@@ -541,19 +552,18 @@ export default {
   color: #999;
 }
 
-/* 底部链接 */
-.footer-link {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-top: 1px solid #f0f0f0;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-}
-
-.footer-link .arrow {
-  color: #999;
+.footer-notice {
+  font-size: 12px;
+  --atom-notice-bar-icon-size: 14px;
+  --atom-notice-bar-height: 28px;
+  --atom-notice-bar-line-height: 28px;
+  background: #F9F9F9;
+  color: #00000066;
+  gap: 4px;
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  justify-items: center;
+  margin-top: 8px;
 }
 </style>

@@ -2,7 +2,7 @@
   <div id="app">
     <h3 style="text-align: center; color: #666; margin: 20px 0;">股份回购组件演示</h3>
 
-    <!-- 状态切换 -->
+    <!-- 状态切换
     <div class="status-switch">
       <span>选择状态：</span>
       <select v-model="currentStatus" @change="updateMockData">
@@ -13,7 +13,7 @@
         <option value="repurchase_completed">回购完成</option>
         <option value="repurchase_terminated">回购终止</option>
       </select>
-    </div>
+    </div> -->
 
     <!-- 组件展示 -->
     <StockRepurchase :repurchase-list="repurchaseList" :total-count="999" @tab-change="onTabChange"
